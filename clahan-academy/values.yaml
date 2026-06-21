@@ -8,7 +8,8 @@ global:
 
 azure:
   tenantId: "67e6de35-58f8-4419-b1c4-1e5d7c49e04b"
-  keyVaultName: "kv-clahan-academy"
+  keyVaultName: "kv-cl06211355"
+
   workloadIdentity:
     frontend:
       clientId: "PLACEHOLDER_FRONTEND_CLIENT_ID"
