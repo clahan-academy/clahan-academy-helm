@@ -20,7 +20,7 @@ spec:
       containers:
         - name: auth
           # Stateless JWT auth - 2 replicas, Redis handles rate limiting
-          image: acrclahanacademy.azurecr.io/clahan-auth:latest
+          image: acrclahan65bf2554.azurecr.io/clahan-auth:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 4001

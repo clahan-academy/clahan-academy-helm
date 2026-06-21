@@ -20,7 +20,7 @@ spec:
       containers:
         - name: frontend
           # Stateless React SPA - 2 replicas for load distribution
-          image: acrclahanacademy.azurecr.io/clahan-frontend:latest
+          image: acrclahan65bf2554.azurecr.io/clahan-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5173

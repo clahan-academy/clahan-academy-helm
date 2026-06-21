@@ -20,7 +20,7 @@ spec:
       containers:
         - name: notification
           # BullMQ email worker - single replica processes Redis queue
-          image: acrclahanacademy.azurecr.io/clahan-notification:latest
+          image: acrclahan65bf2554.azurecr.io/clahan-notification:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 4006

@@ -20,7 +20,7 @@ spec:
       containers:
         - name: proctoring
           # WebSocket proctoring - 2 replicas with session affinity
-          image: acrclahanacademy.azurecr.io/clahan-proctoring:latest
+          image: acrclahan65bf2554.azurecr.io/clahan-proctoring:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 4005

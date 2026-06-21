@@ -27,7 +27,7 @@ spec:
       containers:
         - name: ai
           # AI service on dedicated node - YOLO and InsightFace
-          image: acrclahanacademy.azurecr.io/clahan-ai:latest
+          image: acrclahan65bf2554.azurecr.io/clahan-ai:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
