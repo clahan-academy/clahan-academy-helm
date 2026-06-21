@@ -7,8 +7,8 @@ global:
   imagePullPolicy: Always
 
 azure:
-  tenantId: "67e6de35-58f8-4419-b1c4-1e5d7c49e04b"
-  keyVaultName: "kv-cl06211355"
+  tenantId: "d8537334-bc24-4daf-95a8-bf4c9fb14394"
+  keyVaultName: "kv-clahan-65bf2554"
 
   workloadIdentity:
     frontend:
