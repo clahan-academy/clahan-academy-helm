@@ -14,3 +14,37 @@ home: https://clahaanacademy.online
 maintainers:
   - name: M-VIGNESH3
     email: vigneshmtinku@gmail.com
+dependencies:
+  - name: auth
+    version: 0.1.0
+    repository: "file://charts/auth"
+  - name: admin
+    version: 0.1.0
+    repository: "file://charts/admin"
+  - name: student
+    version: 0.1.0
+    repository: "file://charts/student"
+  - name: exam
+    version: 0.1.0
+    repository: "file://charts/exam"
+  - name: proctoring
+    version: 0.1.0
+    repository: "file://charts/proctoring"
+  - name: notification
+    version: 0.1.0
+    repository: "file://charts/notification"
+  - name: ai
+    version: 0.1.0
+    repository: "file://charts/ai"
+  - name: ollama
+    version: 0.1.0
+    repository: "file://charts/ollama"
+  - name: judge0
+    version: 0.1.0
+    repository: "file://charts/judge0"
+  - name: frontend
+    version: 0.1.0
+    repository: "file://charts/frontend"
+  - name: redis
+    version: 0.1.0
+    repository: "file://charts/redis"

@@ -5,29 +5,27 @@ global:
   namespace: clahan-academy
   environment: dev
   imagePullPolicy: Always
-
-azure:
-  tenantId: "d8537334-bc24-4daf-95a8-bf4c9fb14394"
-  keyVaultName: "kv-clahan-65bf2554"
-
-  workloadIdentity:
-    frontend:
-      clientId: "PLACEHOLDER_FRONTEND_CLIENT_ID"
-    auth:
-      clientId: "PLACEHOLDER_AUTH_CLIENT_ID"
-    admin:
-      clientId: "PLACEHOLDER_ADMIN_CLIENT_ID"
-    student:
-      clientId: "PLACEHOLDER_STUDENT_CLIENT_ID"
-    exam:
-      clientId: "PLACEHOLDER_EXAM_CLIENT_ID"
-    proctoring:
-      clientId: "PLACEHOLDER_PROCTORING_CLIENT_ID"
-    notification:
-      clientId: "PLACEHOLDER_NOTIFICATION_CLIENT_ID"
-    ai:
-      clientId: "PLACEHOLDER_AI_CLIENT_ID"
-
+  azure:
+    tenantId: "d8537334-bc24-4daf-95a8-bf4c9fb14394"
+    keyVaultName: "kv-clahan-65bf2554"
+    workloadIdentity:
+      frontend:
+        clientId: "PLACEHOLDER_FRONTEND_CLIENT_ID"
+      auth:
+        clientId: "PLACEHOLDER_AUTH_CLIENT_ID"
+      admin:
+        clientId: "PLACEHOLDER_ADMIN_CLIENT_ID"
+      student:
+        clientId: "PLACEHOLDER_STUDENT_CLIENT_ID"
+      exam:
+        clientId: "PLACEHOLDER_EXAM_CLIENT_ID"
+      proctoring:
+        clientId: "PLACEHOLDER_PROCTORING_CLIENT_ID"
+      notification:
+        clientId: "PLACEHOLDER_NOTIFICATION_CLIENT_ID"
+      ai:
+        clientId: "PLACEHOLDER_AI_CLIENT_ID"
+  
 frontend:
   image:
     repository: acrclahan65bf2554.azurecr.io/clahan-frontend
