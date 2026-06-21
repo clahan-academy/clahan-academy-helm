@@ -11,21 +11,49 @@ global:
 ingress:
   host: dev.clahaanacademy.online
 
-# Dev: lower replicas to save cost
+# Dev Registry Overrides
 frontend:
   replicaCount: 1
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-frontend
 
 auth:
   replicaCount: 1
   autoscaling:
     enabled: false
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-auth
+
+admin:
+  replicaCount: 1
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-admin
+
+student:
+  replicaCount: 1
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-student
 
 exam:
   replicaCount: 1
   autoscaling:
     enabled: false
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-exam
 
 proctoring:
   replicaCount: 1
   autoscaling:
     enabled: false
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-proctoring
+
+notification:
+  replicaCount: 1
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-notification
+
+ai:
+  replicaCount: 1
+  image:
+    repository: acrclahan65bf2554dev.azurecr.io/clahan-ai
