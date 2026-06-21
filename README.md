@@ -1,3 +1,3 @@
-﻿# Clahan Academy Helm & Kubernetes
+﻿# Clahan Academy Helm
 
 Helm chart, Kubernetes manifests, ArgoCD config.
