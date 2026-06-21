@@ -1,3 +1,7 @@
-﻿*.tgz
+*.tgz
 .DS_Store
 .vscode/
+
+# Graphify
+graphify-out/
+.graphify/
