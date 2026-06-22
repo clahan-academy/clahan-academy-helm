@@ -4,9 +4,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: judge0-worker
-  namespace: clahan-academy
+  namespace: {{ .Values.global.namespace }}
   labels:
-    {{- include "clahan.labels" . | nindent 4 }}
     app: judge0-worker
 spec:
   replicas: 1

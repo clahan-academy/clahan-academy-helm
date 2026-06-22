@@ -4,9 +4,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-service
-  namespace: clahan-academy
+  namespace: {{ .Values.global.namespace }}
   labels:
-    {{- include "clahan.labels" . | nindent 4 }}
     app: frontend-service
 spec:
   replicas: {{ .Values.replicaCount }}

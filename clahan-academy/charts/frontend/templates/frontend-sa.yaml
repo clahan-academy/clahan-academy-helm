@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: clahan-frontend-sa
-  namespace: clahan-academy
+  namespace: {{ .Values.global.namespace }}
   annotations:
     azure.workload.identity/client-id: {{ .Values.global.azure.workloadIdentity.frontend.clientId | quote }}
   labels:

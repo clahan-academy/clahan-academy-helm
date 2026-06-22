@@ -14,16 +14,17 @@ spec:
   project: clahan-academy
   
   source:
-    repoURL: https://github.com/M-VIGNESH3/clahan-academy.git
+    repoURL: https://github.com/clahan-academy/clahan-academy-helm.git
     targetRevision: main
-    path: helm/clahan-academy
+    path: clahan-academy
     helm:
       valueFiles:
         - values.yaml
+        - values-dev.yaml
   
   destination:
     server: https://kubernetes.default.svc
-    namespace: clahan-academy
+    namespace: clahan-dev
   
   syncPolicy:
     automated:

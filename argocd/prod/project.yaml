@@ -11,7 +11,7 @@ spec:
   description: "Clahan Academy V2 Production - Online Exam Platform"
   
   sourceRepos:
-    - https://github.com/M-VIGNESH3/clahan-academy.git
+    - https://github.com/clahan-academy/clahan-academy-helm.git
   
   destinations:
     - namespace: clahan-production

@@ -11,9 +11,11 @@ spec:
   description: "Clahan Academy V2 - Online Exam Platform"
   
   sourceRepos:
-    - https://github.com/M-VIGNESH3/clahan-academy.git
+    - https://github.com/clahan-academy/clahan-academy-helm.git
   
   destinations:
+    - namespace: clahan-dev
+      server: https://kubernetes.default.svc
     - namespace: clahan-academy
       server: https://kubernetes.default.svc
     - namespace: argocd

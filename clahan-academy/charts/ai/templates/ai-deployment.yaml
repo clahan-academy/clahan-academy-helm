@@ -4,9 +4,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-service
-  namespace: clahan-academy
+  namespace: {{ .Values.global.namespace }}
   labels:
-    {{- include "clahan.labels" . | nindent 4 }}
     app: ai-service
 spec:
   replicas: {{ .Values.replicaCount }}
