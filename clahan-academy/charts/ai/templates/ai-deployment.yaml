@@ -34,11 +34,17 @@ spec:
         - name: ai
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              for f in /mnt/secrets/*; do
+                if [ -f "$f" ]; then
+                  export "$(basename "$f")"="$(cat "$f")"
+                fi
+              done;
+              uvicorn main:app --host 0.0.0.0 --port 8000
           ports:
             - containerPort: {{ .Values.port }}
-          envFrom:
-            - secretRef:
-                name: clahan-ai-secrets
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets

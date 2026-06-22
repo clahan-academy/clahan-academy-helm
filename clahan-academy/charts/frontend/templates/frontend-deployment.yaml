@@ -19,26 +19,12 @@ spec:
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: clahan-frontend-sa
-      volumes:
-        - name: secrets-store
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: clahan-frontend-secrets
       containers:
         - name: frontend
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.port }}
-          envFrom:
-            - secretRef:
-                name: clahan-frontend-secrets
-          volumeMounts:
-            - name: secrets-store
-              mountPath: /mnt/secrets
-              readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:

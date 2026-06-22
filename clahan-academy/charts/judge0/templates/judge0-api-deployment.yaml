@@ -18,11 +18,6 @@ spec:
         app: judge0-api
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: clahan-exam-sa
-      nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
-      tolerations:
-        {{- toYaml .Values.tolerations | nindent 8 }}
       volumes:
         - name: secrets-store
           csi:
@@ -33,6 +28,11 @@ spec:
       containers:
         - name: judge0-api
           image: "{{ .Values.api.image }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              export DATABASE_URL=$(cat /mnt/secrets/JUDGE0_DB_CONNECTION_STRING);
+              exec ./scripts/server
           ports:
             - containerPort: {{ .Values.api.port }}
           env:
@@ -40,11 +40,6 @@ spec:
               value: "judge0-redis"
             - name: REDIS_PORT
               value: "6379"
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: clahan-exam-secrets
-                  key: JUDGE0_DB_CONNECTION_STRING
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets

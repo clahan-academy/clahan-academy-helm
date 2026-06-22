@@ -72,6 +72,11 @@ admin:
     limits:
       cpu: "500m"
       memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
 
 student:
   image:
@@ -86,6 +91,11 @@ student:
     limits:
       cpu: "500m"
       memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
 
 exam:
   image:
@@ -138,6 +148,11 @@ notification:
     limits:
       cpu: "500m"
       memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
 
 ai:
   image:
@@ -152,6 +167,11 @@ ai:
     limits:
       cpu: "1500m"
       memory: "2Gi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
   nodeSelector:
     pool: ai
   tolerations:

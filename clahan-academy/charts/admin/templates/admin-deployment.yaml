@@ -18,7 +18,6 @@ spec:
         app: admin-service
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: clahan-admin-sa
       volumes:
         - name: secrets-store
           csi:
@@ -30,11 +29,17 @@ spec:
         - name: admin
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              for f in /mnt/secrets/*; do
+                if [ -f "$f" ]; then
+                  export "$(basename "$f")"="$(cat "$f")"
+                fi
+              done;
+              node dist/index.js
           ports:
             - containerPort: {{ .Values.port }}
-          envFrom:
-            - secretRef:
-                name: clahan-admin-secrets
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets

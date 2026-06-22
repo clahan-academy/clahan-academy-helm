@@ -37,17 +37,16 @@ spec:
       containers:
         - name: judge0-worker
           image: "{{ .Values.worker.image }}"
-          command: ["./scripts/workers"]
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              export DATABASE_URL=$(cat /mnt/secrets/JUDGE0_DB_CONNECTION_STRING);
+              exec ./scripts/workers
           env:
             - name: REDIS_HOST
               value: "judge0-redis"
             - name: REDIS_PORT
               value: "6379"
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: clahan-exam-secrets
-                  key: JUDGE0_DB_CONNECTION_STRING
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets
