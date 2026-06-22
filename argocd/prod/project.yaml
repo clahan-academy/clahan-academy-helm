@@ -22,6 +22,8 @@ spec:
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
+    - group: cert-manager.io
+      kind: ClusterIssuer
     - group: secrets-store.csi.x-k8s.io
       kind: SecretProviderClass
   
@@ -48,6 +50,10 @@ spec:
       kind: NetworkPolicy
     - group: secrets-store.csi.x-k8s.io
       kind: SecretProviderClass
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
   
   roles:
     - name: administrator
