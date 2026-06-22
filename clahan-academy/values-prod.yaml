@@ -35,10 +35,10 @@ frontend:
   replicaCount: 2
 
 auth:
-  replicaCount: 3
+  replicaCount: 2
   autoscaling:
     enabled: true
-    minReplicas: 3
+    minReplicas: 2
     maxReplicas: 8
     targetCPUUtilizationPercentage: 60
 
@@ -59,18 +59,18 @@ student:
     targetCPUUtilizationPercentage: 65
 
 exam:
-  replicaCount: 3
+  replicaCount: 2
   autoscaling:
     enabled: true
-    minReplicas: 3
+    minReplicas: 2
     maxReplicas: 8
     targetCPUUtilizationPercentage: 60
 
 proctoring:
-  replicaCount: 3
+  replicaCount: 2
   autoscaling:
     enabled: true
-    minReplicas: 3
+    minReplicas: 2
     maxReplicas: 8
     targetCPUUtilizationPercentage: 60
 
