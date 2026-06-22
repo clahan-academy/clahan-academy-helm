@@ -18,32 +18,16 @@ spec:
         app: admin-service
         azure.workload.identity/use: "true"
     spec:
-      volumes:
-        - name: secrets-store
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: clahan-admin-secrets
+      serviceAccountName: clahan-admin-sa
       containers:
         - name: admin
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
-          command: ["/bin/sh", "-c"]
-          args:
-            - >
-              for f in /mnt/secrets/*; do
-                if [ -f "$f" ]; then
-                  export "$(basename "$f")"="$(cat "$f")"
-                fi
-              done;
-              node dist/index.js
+          env:
+            - name: KEY_VAULT_NAME
+              value: {{ .Values.global.azure.keyVaultName | quote }}
           ports:
             - containerPort: {{ .Values.port }}
-          volumeMounts:
-            - name: secrets-store
-              mountPath: /mnt/secrets
-              readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:

@@ -18,32 +18,45 @@ spec:
         app: judge0-api
         azure.workload.identity/use: "true"
     spec:
-      volumes:
-        - name: secrets-store
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: clahan-exam-secrets
+      serviceAccountName: clahan-exam-sa
       containers:
         - name: judge0-api
           image: "{{ .Values.api.image }}"
           command: ["/bin/sh", "-c"]
           args:
             - >
-              export DATABASE_URL=$(cat /mnt/secrets/JUDGE0_DB_CONNECTION_STRING);
+              export DATABASE_URL=$(ruby -e "
+                require 'net/http'
+                require 'json'
+                require 'uri'
+                federated_token = File.read(ENV['AZURE_FEDERATED_TOKEN_FILE']).strip
+                uri = URI.parse(\"#{ENV['AZURE_AUTHORITY_HOST']}#{ENV['AZURE_TENANT_ID']}/oauth2/token\")
+                req = Net::HTTP::Post.new(uri)
+                req.set_form_data(
+                  'grant_type' => 'client_credentials',
+                  'client_id' => ENV['AZURE_CLIENT_ID'],
+                  'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+                  'client_assertion' => federated_token,
+                  'resource' => 'https://vault.azure.net'
+                )
+                res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
+                access_token = JSON.parse(res.body)['access_token']
+                secret_uri = URI.parse(\"https://#{ENV['KEY_VAULT_NAME']}.vault.azure.net/secrets/judge0-db-connection-string?api-version=7.4\")
+                secret_req = Net::HTTP::Get.new(secret_uri)
+                secret_req['Authorization'] = \"Bearer #{access_token}\"
+                secret_res = Net::HTTP.start(secret_uri.hostname, secret_uri.port, use_ssl: true) { |http| http.request(secret_req) }
+                puts JSON.parse(secret_res.body)['value']
+              ");
               exec ./scripts/server
           ports:
             - containerPort: {{ .Values.api.port }}
           env:
+            - name: KEY_VAULT_NAME
+              value: {{ .Values.global.azure.keyVaultName | quote }}
             - name: REDIS_HOST
               value: "judge0-redis"
             - name: REDIS_PORT
               value: "6379"
-          volumeMounts:
-            - name: secrets-store
-              mountPath: /mnt/secrets
-              readOnly: true
           resources:
             {{- toYaml .Values.api.resources | nindent 12 }}
           livenessProbe:
