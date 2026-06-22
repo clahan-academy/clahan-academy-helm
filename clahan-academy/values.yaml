@@ -206,13 +206,8 @@ judge0:
   redis:
     image: redis:7-alpine
     port: 6379
-  nodeSelector:
-    pool: ai
-  tolerations:
-    - key: dedicated
-      operator: Equal
-      value: ai
-      effect: NoSchedule
+  nodeSelector: {}
+  tolerations: []
 
 ingress:
   enabled: true
