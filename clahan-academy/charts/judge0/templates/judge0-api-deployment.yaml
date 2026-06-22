@@ -40,15 +40,11 @@ spec:
               value: "judge0-redis"
             - name: REDIS_PORT
               value: "6379"
-            - name: POSTGRES_HOST
+            - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: clahan-exam-secrets
                   key: JUDGE0_DB_CONNECTION_STRING
-            - name: POSTGRES_DB
-              value: "judge0"
-            - name: POSTGRES_USER
-              value: "clahanadmin"
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets
