@@ -84,10 +84,12 @@ spec:
           port: 6379
         - protocol: TCP
           port: 2358
-    # Allow egress to external PostgreSQL, Key Vault, and DNS
+    # Allow egress to external PostgreSQL, Redis, Key Vault, and DNS
     - ports:
         - protocol: TCP
           port: 5432
+        - protocol: TCP
+          port: 6379
         - protocol: TCP
           port: 443
         - protocol: UDP

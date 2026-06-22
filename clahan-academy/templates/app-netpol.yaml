@@ -107,6 +107,8 @@ spec:
     # Allow egress to Redis
     - ports:
         - protocol: TCP
+          port: 6379
+        - protocol: TCP
           port: 6380
     # Allow egress to Key Vault (HTTPS) & DNS/core services
     - ports:
@@ -116,3 +118,22 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 6379
