@@ -1,0 +1,35 @@
+# helm/clahan-academy/templates/networkpolicies/gateway-netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: clahan-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress on ports 80 and 443 from any client (including Application Gateway)
+    - ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+  egress:
+    # Allow egress to the kgateway control plane namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+    # Allow egress to backend services in the same namespace
+    - to:
+        - podSelector: {}
+    # Allow egress to DNS/CoreDNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
