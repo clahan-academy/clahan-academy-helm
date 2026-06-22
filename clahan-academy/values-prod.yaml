@@ -7,6 +7,25 @@
 global:
   environment: prod
   namespace: clahan-production
+  azure:
+    keyVaultName: "kv-clahan-prod"
+    workloadIdentity:
+      frontend:
+        clientId: "5ef32fd0-fa4d-4620-aa04-d6ec24808925"
+      auth:
+        clientId: "ea437f3c-ac6c-40a2-a500-933818d1426a"
+      admin:
+        clientId: "80294308-160f-4d52-aa0c-31f3a2e7e3d3"
+      student:
+        clientId: "63209e92-27a7-440b-9f6e-163fbbf9674c"
+      exam:
+        clientId: "0f679097-96a8-4f83-81ce-1959d3d894dd"
+      proctoring:
+        clientId: "6895292e-896f-43ed-9e61-5a81f742b46a"
+      notification:
+        clientId: "1efec16f-856d-472c-8a97-b0f2e4444347"
+      ai:
+        clientId: "f438617e-3c9d-4acc-9fd7-62dd618b0c3e"
 
 ingress:
   host: clahaanacademy.online

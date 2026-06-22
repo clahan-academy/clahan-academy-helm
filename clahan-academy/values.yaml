@@ -10,21 +10,21 @@ global:
     keyVaultName: "kv-clahan-65bf2554"
     workloadIdentity:
       frontend:
-        clientId: "PLACEHOLDER_FRONTEND_CLIENT_ID"
+        clientId: "b00bdac0-b4d2-41f0-a4b2-96bbc8df4ff7"
       auth:
-        clientId: "PLACEHOLDER_AUTH_CLIENT_ID"
+        clientId: "4057a136-4ae8-4f77-806e-c615329f45c4"
       admin:
-        clientId: "PLACEHOLDER_ADMIN_CLIENT_ID"
+        clientId: "2ed2021a-cdec-411a-be5a-949a2e14f193"
       student:
-        clientId: "PLACEHOLDER_STUDENT_CLIENT_ID"
+        clientId: "473f9fb6-2b86-40d8-82cc-56fbfcedb1d1"
       exam:
-        clientId: "PLACEHOLDER_EXAM_CLIENT_ID"
+        clientId: "13f23a5c-8f0d-4ebc-a63a-877f9a7cf451"
       proctoring:
-        clientId: "PLACEHOLDER_PROCTORING_CLIENT_ID"
+        clientId: "0cd010f7-269e-4b62-a429-079f2768bee0"
       notification:
-        clientId: "PLACEHOLDER_NOTIFICATION_CLIENT_ID"
+        clientId: "947e184d-abd5-4c02-b319-015ab8336a46"
       ai:
-        clientId: "PLACEHOLDER_AI_CLIENT_ID"
+        clientId: "7a4fd5b2-7189-4155-b8b2-f0baa2759d88"
   
 frontend:
   image:
