@@ -24,7 +24,7 @@ spec:
   
   destination:
     server: https://kubernetes.default.svc
-    namespace: clahan-prod
+    namespace: clahan-production
   
   syncPolicy:
     automated:

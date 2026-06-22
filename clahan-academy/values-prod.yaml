@@ -6,7 +6,7 @@
 
 global:
   environment: prod
-  namespace: clahan-prod
+  namespace: clahan-production
 
 ingress:
   host: clahaanacademy.online
