@@ -147,11 +147,11 @@ ai:
   port: 8000
   resources:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "250m"
+      memory: "512Mi"
     limits:
-      cpu: "2000m"
-      memory: "4Gi"
+      cpu: "1500m"
+      memory: "2Gi"
   nodeSelector:
     pool: ai
   tolerations:
@@ -167,11 +167,11 @@ ollama:
   model: phi3
   resources:
     requests:
-      cpu: "1000m"
-      memory: "2Gi"
+      cpu: "500m"
+      memory: "1Gi"
     limits:
-      cpu: "2000m"
-      memory: "4Gi"
+      cpu: "1500m"
+      memory: "3Gi"
   nodeSelector:
     pool: ai
   tolerations:
