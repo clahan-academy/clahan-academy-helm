@@ -32,6 +32,11 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: argocd
+    # Allow egress to the monitoring namespace (for Grafana/Prometheus dashboard routing)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
     # Allow egress to DNS/CoreDNS
     - ports:
         - protocol: UDP
