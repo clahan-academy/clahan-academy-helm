@@ -27,6 +27,11 @@ spec:
     # Allow egress to backend services in the same namespace
     - to:
         - podSelector: {}
+    # Allow egress to the argocd namespace (for ArgoCD dashboard routing)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: argocd
     # Allow egress to DNS/CoreDNS
     - ports:
         - protocol: UDP
