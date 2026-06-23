@@ -44,3 +44,14 @@ spec:
         maxDuration: 3m
   
   revisionHistoryLimit: 3
+  
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      jqPathExpressions:
+        - .spec.infrastructure
+        - .metadata.annotations
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .metadata.annotations

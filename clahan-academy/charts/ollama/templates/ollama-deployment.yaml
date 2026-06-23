@@ -9,6 +9,8 @@ metadata:
     app: ollama
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: ollama
