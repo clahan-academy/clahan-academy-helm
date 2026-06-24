@@ -26,10 +26,8 @@ global:
         clientId: "1efec16f-856d-472c-8a97-b0f2e4444347"
       ai:
         clientId: "f438617e-3c9d-4acc-9fd7-62dd618b0c3e"
-
 ingress:
   host: clahaanacademy.online
-
 # Prod: scaled down to 1 replica to save resources
 frontend:
   replicaCount: 1
@@ -38,7 +36,8 @@ frontend:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 70
-
+  image:
+    tag: v0.5.2
 auth:
   replicaCount: 1
   autoscaling:
@@ -46,7 +45,8 @@ auth:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 60
-
+  image:
+    tag: v0.5.2
 admin:
   replicaCount: 1
   autoscaling:
@@ -54,7 +54,8 @@ admin:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
-
+  image:
+    tag: v0.5.2
 student:
   replicaCount: 1
   autoscaling:
@@ -62,7 +63,8 @@ student:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
-
+  image:
+    tag: v0.5.2
 exam:
   replicaCount: 1
   autoscaling:
@@ -70,7 +72,8 @@ exam:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 60
-
+  image:
+    tag: v0.5.2
 proctoring:
   replicaCount: 1
   autoscaling:
@@ -78,7 +81,8 @@ proctoring:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 60
-
+  image:
+    tag: v0.5.2
 notification:
   replicaCount: 1
   autoscaling:
@@ -86,7 +90,8 @@ notification:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
-
+  image:
+    tag: v0.5.2
 ai:
   replicaCount: 1
   autoscaling:
@@ -94,3 +99,5 @@ ai:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
+  image:
+    tag: v0.5.2
