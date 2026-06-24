@@ -30,56 +30,56 @@ global:
 ingress:
   host: clahaanacademy.online
 
-# Prod: higher replicas for HA
+# Prod: scaled down to 1 replica to save resources
 frontend:
-  replicaCount: 2
+  replicaCount: 1
 
 auth:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 8
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 60
 
 admin:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 65
 
 student:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 65
 
 exam:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 8
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 60
 
 proctoring:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 8
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 60
 
 notification:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 65
 
 ai:
@@ -87,5 +87,5 @@ ai:
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 3
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 65
