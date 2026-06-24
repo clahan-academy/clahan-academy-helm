@@ -39,6 +39,11 @@ frontend:
     limits:
       cpu: "500m"
       memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
 auth:
   image:

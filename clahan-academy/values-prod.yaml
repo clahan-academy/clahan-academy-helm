@@ -33,6 +33,11 @@ ingress:
 # Prod: scaled down to 1 replica to save resources
 frontend:
   replicaCount: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 70
 
 auth:
   replicaCount: 1
