@@ -11,21 +11,21 @@ global:
     keyVaultName: "kv-clahan-prod"
     workloadIdentity:
       frontend:
-        clientId: "5ef32fd0-fa4d-4620-aa04-d6ec24808925"
+        clientId: "2dfdd5b0-9508-45a4-96c0-19591f719960"
       auth:
-        clientId: "ea437f3c-ac6c-40a2-a500-933818d1426a"
+        clientId: "4ee30077-073e-4f35-83b0-cb976619cd9d"
       admin:
-        clientId: "80294308-160f-4d52-aa0c-31f3a2e7e3d3"
+        clientId: "10b61956-29c5-4387-9e0f-1326c900dd2b"
       student:
-        clientId: "63209e92-27a7-440b-9f6e-163fbbf9674c"
+        clientId: "78eda1ef-2b69-4230-8b06-8d9a370b9a89"
       exam:
-        clientId: "0f679097-96a8-4f83-81ce-1959d3d894dd"
+        clientId: "6b208bbd-a225-4da9-840f-ee131bb692ab"
       proctoring:
-        clientId: "6895292e-896f-43ed-9e61-5a81f742b46a"
+        clientId: "ae39ece4-fca9-4fa9-9a67-6fbf2dfaeca7"
       notification:
-        clientId: "1efec16f-856d-472c-8a97-b0f2e4444347"
+        clientId: "cece8811-2e5f-445e-950a-3ea634243c06"
       ai:
-        clientId: "f438617e-3c9d-4acc-9fd7-62dd618b0c3e"
+        clientId: "cbdd29aa-5dd4-4f56-9728-87b2008bbc55"
 ingress:
   host: clahaanacademy.online
 # Prod: scaled down to 1 replica to save resources (frontend and auth set to 2 for capstone evaluation compliance)
