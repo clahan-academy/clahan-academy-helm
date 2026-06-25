@@ -37,7 +37,7 @@ frontend:
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 auth:
   replicaCount: 2
   autoscaling:
@@ -46,7 +46,7 @@ auth:
     maxReplicas: 5
     targetCPUUtilizationPercentage: 60
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 admin:
   replicaCount: 1
   autoscaling:
@@ -55,7 +55,7 @@ admin:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 student:
   replicaCount: 1
   autoscaling:
@@ -64,7 +64,7 @@ student:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 exam:
   replicaCount: 1
   autoscaling:
@@ -73,7 +73,7 @@ exam:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 60
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 proctoring:
   replicaCount: 1
   autoscaling:
@@ -82,7 +82,7 @@ proctoring:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 60
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 notification:
   replicaCount: 1
   autoscaling:
@@ -91,7 +91,7 @@ notification:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
   image:
-    tag: v0.5.3
+    tag: v0.5.4
 ai:
   replicaCount: 1
   autoscaling:
@@ -100,4 +100,4 @@ ai:
     maxReplicas: 1
     targetCPUUtilizationPercentage: 65
   image:
-    tag: v0.5.3
+    tag: v0.5.4
