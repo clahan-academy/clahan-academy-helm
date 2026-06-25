@@ -15,6 +15,12 @@ metadata:
     gateway.kgateway.dev/gateway-parameters-name: clahan-gateway-params
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    parametersRef:
+      group: gateway.kgateway.dev
+      kind: GatewayParameters
+      name: clahan-gateway-params
+
 
   listeners:
     - name: http
