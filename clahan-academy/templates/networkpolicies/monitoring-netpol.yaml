@@ -1,0 +1,75 @@
+# helm/clahan-academy/templates/networkpolicies/monitoring-netpol.yaml
+#
+# default-deny.yaml blocks all ingress/egress for every pod in the namespace.
+# prometheus and grafana were never given their own carve-out (only
+# app-netpol and gateway-netpol exist), so the Gateway could never reach
+# their UIs (Bad Gateway on grafana./prometheus. subdomains) and prometheus
+# could never reach anything to scrape (no data in Grafana/Prometheus).
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow the Gateway (and Grafana, for its datasource queries) to reach Prometheus
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    # Scrape targets discovered via kubernetes_sd_configs: apiserver endpoints,
+    # node kubelets, and any annotated pod in this namespace.
+    - to:
+        - podSelector: {}
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 10250
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: grafana
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow the Gateway to reach Grafana's UI
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # Query its Prometheus datasource + DNS
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

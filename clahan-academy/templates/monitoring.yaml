@@ -98,6 +98,22 @@ spec:
     - port: 9090
       targetPort: 9090
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: {{ .Values.global.namespace }}
+data:
+  prometheus.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+        editable: false
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -128,9 +144,14 @@ spec:
           volumeMounts:
             - name: storage-volume
               mountPath: /var/lib/grafana
+            - name: datasources-volume
+              mountPath: /etc/grafana/provisioning/datasources
       volumes:
         - name: storage-volume
           emptyDir: {}
+        - name: datasources-volume
+          configMap:
+            name: grafana-datasources
 ---
 apiVersion: v1
 kind: Service

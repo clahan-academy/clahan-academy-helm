@@ -22,21 +22,16 @@ spec:
       name: clahan-gateway-params
 
 
+  # HTTP only - Application Gateway terminates TLS at the edge (using the
+  # Key Vault-backed clahan-ssl-cert) and talks plain HTTP to this backend
+  # pool, so an in-cluster HTTPS listener was never on the real traffic path.
+  # It used to require a separately-managed self-signed clahan-tls-secret
+  # that wasn't recreated automatically, which could leave the whole Gateway
+  # unable to admit any route after an infra rebuild.
   listeners:
     - name: http
       port: 80
       protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: All
-    - name: https
-      port: 443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: clahan-tls-secret
-            kind: Secret
       allowedRoutes:
         namespaces:
           from: All

@@ -242,9 +242,8 @@ judge0:
 ingress:
   enabled: true
   host: clahaanacademy.online
-  tls:
-    enabled: true
-    secretName: clahan-tls-secret
+  # TLS terminates at Application Gateway using the Key Vault-backed
+  # clahan-ssl-cert; the in-cluster Gateway is HTTP-only (see gateway.yaml).
 
 gateway:
   className: kgateway
