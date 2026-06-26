@@ -1,0 +1,47 @@
+# helm/clahan-academy/templates/monitoring-netpol.yaml
+# NetworkPolicy to allow ingress/egress for Prometheus and Grafana
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - prometheus
+          - grafana
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from the gateway to Grafana (port 3000) and Prometheus (port 9090)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: clahan-gateway
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 9090
+    # Allow Grafana to communicate with Prometheus
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    # Allow Prometheus to scrape metrics from all pods in the namespace
+    - to:
+        - podSelector: {}
+    # Allow egress to DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
