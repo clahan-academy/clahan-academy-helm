@@ -1,0 +1,84 @@
+# helm/clahan-academy/templates/gateway-ip-patch-hook.yaml
+#
+# kgateway's GatewayParameters.spec.kube.service.extraAnnotations does not
+# reliably propagate onto the Service it generates for clahan-gateway (the
+# Service comes up with zero annotations, so Azure CCM defaults to a public
+# LoadBalancer instead of the internal 10.0.4.250 AppGW backend expects).
+# This ArgoCD PostSync hook re-applies the annotation directly on every sync,
+# so the internal-IP fix is no longer a manual step (patch-gateway.sh) that
+# has to be remembered after each rebuild.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gateway-ip-patcher
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gateway-ip-patcher
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gateway-ip-patcher
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gateway-ip-patcher
+subjects:
+  - kind: ServiceAccount
+    name: gateway-ip-patcher
+    namespace: {{ .Values.global.namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gateway-ip-patch
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: gateway-ip-patcher
+      restartPolicy: Never
+      containers:
+        - name: patch-gateway-ip
+          image: bitnami/kubectl:1.31
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              for i in $(seq 1 30); do
+                if kubectl get svc clahan-gateway -n {{ .Values.global.namespace }} >/dev/null 2>&1; then
+                  kubectl annotate svc clahan-gateway -n {{ .Values.global.namespace }} \
+                    service.beta.kubernetes.io/azure-load-balancer-internal=true \
+                    service.beta.kubernetes.io/azure-load-balancer-ipv4=10.0.4.250 \
+                    --overwrite
+                  echo "clahan-gateway annotated for internal LB"
+                  exit 0
+                fi
+                echo "clahan-gateway service not found yet, retrying ($i/30)..."
+                sleep 5
+              done
+              echo "ERROR: clahan-gateway service never appeared after 150s"
+              exit 1
