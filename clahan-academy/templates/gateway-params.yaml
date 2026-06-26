@@ -1,3 +1,9 @@
+# Service type is ClusterIP, not LoadBalancer: kgateway's
+# extraAnnotations never reliably propagated onto its generated Service
+# (confirmed - it came up with zero annotations), and a separate
+# Helm-managed Service (gateway-internal-lb.yaml) now fronts these same
+# proxy pods directly with the internal-LB annotations baked in from
+# creation, instead of depending on kgateway to apply them after the fact.
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -6,7 +12,4 @@ metadata:
 spec:
   kube:
     service:
-      type: LoadBalancer
-      extraAnnotations:
-        service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-        service.beta.kubernetes.io/azure-load-balancer-ipv4: "10.0.4.250"
+      type: ClusterIP

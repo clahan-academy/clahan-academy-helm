@@ -1,0 +1,37 @@
+# helm/clahan-academy/templates/gateway-internal-lb.yaml
+#
+# kgateway's GatewayParameters.spec.kube.service.extraAnnotations never
+# reliably applied the internal-LB annotations to its auto-generated
+# Service (it came up with zero annotations every rebuild, and even a
+# PostSync hook re-annotating it afterward was unreliable - both because
+# Azure does not support migrating an already-public LoadBalancer Service
+# to internal by re-annotating it, and because the hook's timing depended
+# on the sync settling within a window).
+#
+# This Service is a plain, Helm-managed resource - the same kind that
+# already syncs reliably for every app service - selecting the same Envoy
+# proxy pods kgateway manages (via gateway.yaml's stable
+# gateway.networking.k8s.io/gateway-name label), with the internal-LB
+# annotations present from the very first reconciliation. It is never
+# "born public," so there is nothing for Azure to migrate.
+apiVersion: v1
+kind: Service
+metadata:
+  name: clahan-gateway-internal-lb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: clahan-gateway-internal-lb
+    app.kubernetes.io/managed-by: helm
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-load-balancer-ipv4: "10.0.4.250"
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: clahan-gateway
+    gateway.networking.k8s.io/gateway-name: clahan-gateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
