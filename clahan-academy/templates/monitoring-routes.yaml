@@ -1,0 +1,47 @@
+# helm/clahan-academy/templates/monitoring-routes.yaml
+# HTTPRoutes to route traffic for grafana and prometheus subdomains
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: grafana-route
+    app.kubernetes.io/managed-by: helm
+spec:
+  parentRefs:
+    - name: clahan-gateway
+      namespace: {{ .Values.global.namespace }}
+  hostnames:
+    - "grafana.{{ .Values.ingress.host }}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: grafana
+          port: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prometheus-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: prometheus-route
+    app.kubernetes.io/managed-by: helm
+spec:
+  parentRefs:
+    - name: clahan-gateway
+      namespace: {{ .Values.global.namespace }}
+  hostnames:
+    - "prometheus.{{ .Values.ingress.host }}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prometheus
+          port: 9090
