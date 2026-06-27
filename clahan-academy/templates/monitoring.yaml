@@ -44,6 +44,20 @@ data:
         kubernetes_sd_configs:
           - role: node
         metrics_path: /metrics/cadvisor
+      # node-exporter is headless (clusterIP: None) so role:endpoints
+      # discovers each DaemonSet pod's address:9100 directly.
+      - job_name: 'node-exporter'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: node-exporter
+      # kube-state-metrics is a single stable in-namespace Service - no
+      # need for k8s service discovery, just scrape it directly.
+      - job_name: 'kube-state-metrics'
+        static_configs:
+          - targets: ['kube-state-metrics:8080']
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
@@ -306,6 +320,149 @@ data:
           ],
           "fieldConfig": { "defaults": { "unit": "Bps" } }
         }
+      ]
+    }
+  pod-status.json: |
+    {
+      "title": "Clahan Academy - Pod Status",
+      "uid": "clahan-pod-status",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Pods by Phase", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "sum(kube_pod_status_phase{namespace=\"clahan-production\"}) by (phase)", "legendFormat": "{{`{{phase}}`}}", "refId": "A" } ] },
+        { "id": 2, "title": "Container Restarts (rate, 1h)", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"clahan-production\"}[1h])) by (pod)", "legendFormat": "{{`{{pod}}`}}", "refId": "A" } ] },
+        { "id": 3, "title": "Ready vs Not Ready Containers", "type": "timeseries", "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "sum(kube_pod_container_status_ready{namespace=\"clahan-production\"})", "legendFormat": "Ready", "refId": "A" }, { "expr": "sum(1 - kube_pod_container_status_ready{namespace=\"clahan-production\"})", "legendFormat": "Not Ready", "refId": "B" } ] }
+      ]
+    }
+  deployment-health.json: |
+    {
+      "title": "Clahan Academy - Deployment Health",
+      "uid": "clahan-deployment-health",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Desired vs Available Replicas", "type": "timeseries", "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "kube_deployment_spec_replicas{namespace=\"clahan-production\"}", "legendFormat": "{{`{{deployment}}`}} desired", "refId": "A" },
+            { "expr": "kube_deployment_status_replicas_available{namespace=\"clahan-production\"}", "legendFormat": "{{`{{deployment}}`}} available", "refId": "B" }
+          ] },
+        { "id": 2, "title": "Unavailable Replicas", "type": "timeseries", "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "kube_deployment_status_replicas_unavailable{namespace=\"clahan-production\"}", "legendFormat": "{{`{{deployment}}`}}", "refId": "A" } ] }
+      ]
+    }
+  hpa-autoscaling.json: |
+    {
+      "title": "Clahan Academy - HPA Autoscaling",
+      "uid": "clahan-hpa-autoscaling",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Current vs Desired Replicas per HPA", "type": "timeseries", "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"clahan-production\"}", "legendFormat": "{{`{{horizontalpodautoscaler}}`}} current", "refId": "A" },
+            { "expr": "kube_horizontalpodautoscaler_status_desired_replicas{namespace=\"clahan-production\"}", "legendFormat": "{{`{{horizontalpodautoscaler}}`}} desired", "refId": "B" }
+          ] },
+        { "id": 2, "title": "Max Replicas Ceiling", "type": "timeseries", "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "kube_horizontalpodautoscaler_spec_max_replicas{namespace=\"clahan-production\"}", "legendFormat": "{{`{{horizontalpodautoscaler}}`}}", "refId": "A" } ] }
+      ]
+    }
+  resource-requests-limits.json: |
+    {
+      "title": "Clahan Academy - Resource Requests vs Limits",
+      "uid": "clahan-resource-req-limits",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "CPU Requests vs Limits by Pod", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(kube_pod_container_resource_requests{namespace=\"clahan-production\",resource=\"cpu\"}) by (pod)", "legendFormat": "{{`{{pod}}`}} request", "refId": "A" },
+            { "expr": "sum(kube_pod_container_resource_limits{namespace=\"clahan-production\",resource=\"cpu\"}) by (pod)", "legendFormat": "{{`{{pod}}`}} limit", "refId": "B" }
+          ] },
+        { "id": 2, "title": "Memory Requests vs Limits by Pod", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(kube_pod_container_resource_requests{namespace=\"clahan-production\",resource=\"memory\"}) by (pod)", "legendFormat": "{{`{{pod}}`}} request", "refId": "A" },
+            { "expr": "sum(kube_pod_container_resource_limits{namespace=\"clahan-production\",resource=\"memory\"}) by (pod)", "legendFormat": "{{`{{pod}}`}} limit", "refId": "B" }
+          ] }
+      ]
+    }
+  node-exporter-cpu.json: |
+    {
+      "title": "Clahan Academy - Node CPU (node-exporter)",
+      "uid": "clahan-node-cpu",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "CPU Usage by Mode", "type": "timeseries", "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "sum(rate(node_cpu_seconds_total[5m])) by (mode)", "legendFormat": "{{`{{mode}}`}}", "refId": "A" } ] },
+        { "id": 2, "title": "Load Average (1m)", "type": "timeseries", "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "node_load1", "legendFormat": "{{`{{instance}}`}}", "refId": "A" } ] }
+      ]
+    }
+  node-exporter-memory.json: |
+    {
+      "title": "Clahan Academy - Node Memory (node-exporter)",
+      "uid": "clahan-node-memory",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Available vs Total Memory", "type": "timeseries", "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "node_memory_MemAvailable_bytes", "legendFormat": "{{`{{instance}}`}} available", "refId": "A" },
+            { "expr": "node_memory_MemTotal_bytes", "legendFormat": "{{`{{instance}}`}} total", "refId": "B" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } } },
+        { "id": 2, "title": "Memory Used %", "type": "timeseries", "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)", "legendFormat": "{{`{{instance}}`}}", "refId": "A" } ],
+          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } } }
+      ]
+    }
+  node-exporter-disk.json: |
+    {
+      "title": "Clahan Academy - Node Disk (node-exporter)",
+      "uid": "clahan-node-disk",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Filesystem Available", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "node_filesystem_avail_bytes{fstype!=\"tmpfs\"}", "legendFormat": "{{`{{instance}}`}} {{`{{mountpoint}}`}}", "refId": "A" } ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } } },
+        { "id": 2, "title": "Disk I/O Time", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "rate(node_disk_io_time_seconds_total[5m])", "legendFormat": "{{`{{instance}}`}} {{`{{device}}`}}", "refId": "A" } ] }
+      ]
+    }
+  node-exporter-network.json: |
+    {
+      "title": "Clahan Academy - Node Network (node-exporter)",
+      "uid": "clahan-node-network",
+      "schemaVersion": 38, "version": 1, "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        { "id": 1, "title": "Network Receive", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*\"}[5m])", "legendFormat": "{{`{{instance}}`}} {{`{{device}}`}}", "refId": "A" } ],
+          "fieldConfig": { "defaults": { "unit": "Bps" } } },
+        { "id": 2, "title": "Network Transmit", "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [ { "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*\"}[5m])", "legendFormat": "{{`{{instance}}`}} {{`{{device}}`}}", "refId": "A" } ],
+          "fieldConfig": { "defaults": { "unit": "Bps" } } }
       ]
     }
 ---

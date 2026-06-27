@@ -1,0 +1,175 @@
+# helm/clahan-academy/templates/exporters.yaml
+#
+# Unlocks the metric surface needed for real, standard Kubernetes dashboards.
+# apiserver/kubelet/cadvisor alone only support ~3-4 genuinely distinct
+# dashboards before the data runs out. node-exporter adds full node hardware
+# metrics (CPU by mode, memory breakdown, disk, network). kube-state-metrics
+# adds Kubernetes OBJECT state (pod status, deployment replica health, HPA
+# state, restart counts) that cadvisor/kubelet never expose - cadvisor only
+# knows resource USAGE, not the K8s API's view of desired vs actual state.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: node-exporter
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      serviceAccountName: node-exporter
+      hostNetwork: true
+      hostPID: true
+      # No key specified - tolerates ALL taints, including the ai pool's
+      # dedicated=ai:NoSchedule, so every node gets covered.
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:v1.7.0
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
+            - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)
+          ports:
+            - containerPort: 9100
+              hostPort: 9100
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: root
+              mountPath: /host/root
+              mountPropagation: HostToContainer
+              readOnly: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: root
+          hostPath:
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: node-exporter
+spec:
+  clusterIP: None
+  selector:
+    app: node-exporter
+  ports:
+    - port: 9100
+      targetPort: 9100
+      name: metrics
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-state-metrics
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-state-metrics
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "services", "endpoints", "namespaces", "persistentvolumeclaims", "persistentvolumes", "resourcequotas", "replicationcontrollers", "limitranges", "configmaps", "secrets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies", "ingresses"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses", "volumeattachments"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-state-metrics
+subjects:
+  - kind: ServiceAccount
+    name: kube-state-metrics
+    namespace: {{ .Values.global.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: kube-state-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        app: kube-state-metrics
+    spec:
+      serviceAccountName: kube-state-metrics
+      nodeSelector:
+        pool: app
+      containers:
+        - name: kube-state-metrics
+          image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1
+          ports:
+            - containerPort: 8080
+              name: http-metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-state-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: kube-state-metrics
+spec:
+  selector:
+    app: kube-state-metrics
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http-metrics

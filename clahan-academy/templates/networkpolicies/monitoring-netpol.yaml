@@ -73,3 +73,47 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+---
+# node-exporter and kube-state-metrics also need their own ingress
+# carve-out from default-deny, same reason prometheus/grafana did - without
+# this Prometheus's egress is unrestricted but the scrape target's ingress
+# side still blocks the connection.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: node-exporter-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: node-exporter
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9100
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kube-state-metrics-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: kube-state-metrics
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8080
