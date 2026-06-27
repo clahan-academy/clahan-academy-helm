@@ -30,6 +30,20 @@ data:
         bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
         kubernetes_sd_configs:
           - role: node
+      # The default /metrics path above is the kubelet PROCESS's own metrics
+      # (kubelet_running_pods, go_goroutines, etc.) - container-level
+      # CPU/memory (container_cpu_usage_seconds_total etc.) comes from a
+      # separate cAdvisor endpoint the kubelet also exposes. Without this
+      # job, the dashboard's CPU/memory panels stay empty even with the
+      # kubernetes-nodes job's targets showing "up".
+      - job_name: 'kubernetes-cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        metrics_path: /metrics/cadvisor
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
@@ -238,6 +252,59 @@ data:
           "targets": [
             { "expr": "sum(container_memory_working_set_bytes{namespace=\"clahan-production\"}) by (pod)", "legendFormat": "{{`{{pod}}`}}", "refId": "A" }
           ]
+        }
+      ]
+    }
+  node-storage-health.json: |
+    {
+      "title": "Clahan Academy - Node & Storage Health",
+      "uid": "clahan-node-storage-health",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Kubelet Process CPU by Node",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "rate(process_cpu_seconds_total{job=\"kubernetes-nodes\"}[5m])", "legendFormat": "{{`{{instance}}`}}", "refId": "A" }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Kubelet Process Memory by Node",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "process_resident_memory_bytes{job=\"kubernetes-nodes\"}", "legendFormat": "{{`{{instance}}`}}", "refId": "A" }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "PVC Usage %",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "100 * kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes", "legendFormat": "{{`{{namespace}}`}}/{{`{{persistentvolumeclaim}}`}}", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } }
+        },
+        {
+          "id": 4,
+          "title": "Pod Network I/O (receive) - clahan-production",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"clahan-production\"}[5m])) by (pod)", "legendFormat": "{{`{{pod}}`}}", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "Bps" } }
         }
       ]
     }
