@@ -235,6 +235,14 @@ spec:
     spec:
       nodeSelector:
         pool: app
+      # A fresh Azure Disk PV mounts root-owned by default. The grafana/grafana
+      # image runs as uid/gid 472, which had no write access to the new PVC
+      # (confirmed: "GF_PATHS_DATA is not writable" / "mkdir: Permission
+      # denied" in the container logs) - emptyDir never had this problem
+      # since its ownership matches whatever the container can write.
+      # fsGroup chowns the volume to gid 472 on mount, fixing it.
+      securityContext:
+        fsGroup: 472
       containers:
         - name: grafana
           image: grafana/grafana:10.0.0
