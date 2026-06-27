@@ -194,10 +194,16 @@ ollama:
   resources:
     requests:
       cpu: "500m"
-      memory: "1Gi"
+      memory: "1.5Gi"
+    # memory limit raised 3Gi -> 5.5Gi: confirmed via `kubectl describe pod`
+    # that ollama was being OOMKilled (exit 137) at the old 3Gi ceiling -
+    # that's a per-cgroup kill independent of node-wide memory pressure, and
+    # everything else on this node was using well under its own limit at
+    # the time (ai-service 569Mi/2Gi, judge0-worker 332Mi/2Gi), so there's
+    # real headroom on this Standard_D2s_v3 (8GiB) node without resizing it.
     limits:
       cpu: "1500m"
-      memory: "3Gi"
+      memory: "5.5Gi"
   nodeSelector:
     pool: ai
   tolerations:
