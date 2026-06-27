@@ -42,11 +42,20 @@ spec:
         - name: student-service
           port: 4003
 
-    # Exam Service
+    # Exam Service - explicit generous timeout: this path includes AI-backed
+    # generation endpoints (e.g. generate-coding-question) that call out to
+    # Ollama for LLM inference, which routinely takes longer than the
+    # unset default (kgateway/Envoy defaults to a short timeout, ~15s, if
+    # not specified) - was producing 504 Gateway Timeout on every
+    # generation request. AppGW's own backend timeout also needs raising
+    # to match (see modules/appgw/main.tf request_timeout).
     - matches:
         - path:
             type: PathPrefix
             value: /api/exams
+      timeouts:
+        request: 180s
+        backendRequest: 180s
       backendRefs:
         - name: exam-service
           port: 4004

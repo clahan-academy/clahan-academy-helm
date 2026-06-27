@@ -118,6 +118,17 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    # Allow egress to external SMTP relays for notification-service (OTP/
+    # email). This worked in docker-compose because there's no NetworkPolicy
+    # there at all - nothing here ever explicitly allowed SMTP, so it was
+    # silently blocked the whole time once deployed to the cluster.
+    - ports:
+        - protocol: TCP
+          port: 587
+        - protocol: TCP
+          port: 465
+        - protocol: TCP
+          port: 25
 
 ---
 apiVersion: networking.k8s.io/v1
