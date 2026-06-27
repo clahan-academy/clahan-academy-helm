@@ -93,11 +93,15 @@ notification:
   image:
     tag: v0.5.4
 ai:
-  replicaCount: 2
+  # Kept at 1, unlike every other service: the ai node pool is fixed at a
+  # single node (no autoscaling, by your choice) and is already at 91% CPU
+  # running ollama alongside it - a 2nd replica was stuck Pending with no
+  # capacity to schedule onto. Revisit if that pool ever gets a 2nd node.
+  replicaCount: 1
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 3
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 65
   image:
     tag: v0.5.4

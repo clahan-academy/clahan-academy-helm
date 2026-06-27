@@ -21,6 +21,7 @@ spec:
             value: /
       backendRefs:
         - name: grafana
+          namespace: {{ .Values.global.monitoringNamespace }}
           port: 3000
 ---
 apiVersion: gateway.networking.k8s.io/v1
@@ -44,4 +45,27 @@ spec:
             value: /
       backendRefs:
         - name: prometheus
+          namespace: {{ .Values.global.monitoringNamespace }}
           port: 9090
+---
+# Same Gateway API requirement as the ArgoCD route: an HTTPRoute in one
+# namespace (clahan-production) needs an explicit ReferenceGrant in the
+# TARGET namespace (monitoring) before it's allowed to reference Services
+# there, or kgateway refuses to resolve the backend (RefNotPermitted).
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway-to-monitoring
+  namespace: {{ .Values.global.monitoringNamespace }}
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ .Values.global.namespace }}
+  to:
+    - group: ""
+      kind: Service
+      name: grafana
+    - group: ""
+      kind: Service
+      name: prometheus

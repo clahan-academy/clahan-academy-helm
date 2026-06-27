@@ -3,6 +3,7 @@
 global:
   imageRegistry: acrclahan65bf2554.azurecr.io
   namespace: clahan-academy
+  monitoringNamespace: monitoring
   environment: dev
   imagePullPolicy: Always
   azure:

@@ -1,0 +1,7 @@
+# helm/clahan-academy/templates/monitoring-namespace.yaml
+# Monitoring stack (Grafana/Prometheus/node-exporter/kube-state-metrics)
+# lives in its own namespace, separate from the app services namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.monitoringNamespace }}
