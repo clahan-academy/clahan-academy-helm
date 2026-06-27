@@ -1,0 +1,25 @@
+# helm/clahan-academy/templates/traffic-policy.yaml
+#
+# kgateway's own policy-attachment CRD - the real, working mechanism for
+# setting route timeouts on this kgateway version. The standard Gateway API
+# HTTPRoute.spec.rules[].timeouts field (previously in httproute.yaml) was
+# confirmed non-functional here: requests kept failing at whatever
+# kgateway's unconfigured default timeout is, even though a direct
+# in-cluster test (bypassing the Gateway entirely) proved the same request
+# legitimately completes in ~50s, well under this policy's ceiling.
+#
+# Applied to the whole clahan-routes HTTPRoute rather than just the exam
+# rule for simplicity - a generous timeout ceiling doesn't penalize fast
+# endpoints, it's just the max time before giving up.
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: clahan-routes-timeout
+  namespace: {{ .Values.global.namespace }}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: clahan-routes
+  timeouts:
+    request: 300s

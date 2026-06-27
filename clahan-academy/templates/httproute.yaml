@@ -42,20 +42,21 @@ spec:
         - name: student-service
           port: 4003
 
-    # Exam Service - explicit generous timeout: this path includes AI-backed
-    # generation endpoints (e.g. generate-coding-question) that call out to
-    # Ollama for LLM inference, which routinely takes longer than the
-    # unset default (kgateway/Envoy defaults to a short timeout, ~15s, if
-    # not specified) - was producing 504 Gateway Timeout on every
-    # generation request. AppGW's own backend timeout also needs raising
-    # to match (see modules/appgw/main.tf request_timeout).
+    # Exam Service - timeout for this path is set via TrafficPolicy
+    # (traffic-policy.yaml), not the standard Gateway API rules[].timeouts
+    # field below this comment used to set. Confirmed by diffing live vs
+    # git (same method that found the Gateway spec.infrastructure issue):
+    # kgateway doesn't apply rules[].timeouts at all - it's not just
+    # stripped from spec post-admission like spec.infrastructure, the
+    # underlying Envoy route timeout was never actually configured, so
+    # requests kept dying at whatever kgateway's unconfigured default is
+    # regardless of this field's value. TrafficPolicy.spec.timeouts.request
+    # is kgateway's own real mechanism for this, confirmed via
+    # `kubectl explain trafficpolicies.gateway.kgateway.dev --recursive`.
     - matches:
         - path:
             type: PathPrefix
             value: /api/exams
-      timeouts:
-        request: 300s
-        backendRequest: 300s
       backendRefs:
         - name: exam-service
           port: 4004
