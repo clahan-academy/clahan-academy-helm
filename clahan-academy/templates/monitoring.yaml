@@ -108,11 +108,113 @@ data:
     apiVersion: 1
     datasources:
       - name: Prometheus
+        uid: prometheus_default
         type: prometheus
         access: proxy
         url: http://prometheus:9090
         isDefault: true
         editable: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: {{ .Values.global.namespace }}
+data:
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards
+---
+# Minimal starter dashboard built only from metrics this exact Prometheus
+# config actually scrapes (no node-exporter or kube-state-metrics are
+# deployed here, so a generic community dashboard ID would just show "No
+# Data" on every panel). Survives pod restarts now via the PVC below,
+# unlike a manually-imported dashboard which previously lived only in
+# Grafana's emptyDir sqlite file and was wiped on every restart.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: {{ .Values.global.namespace }}
+data:
+  cluster-overview.json: |
+    {
+      "title": "Clahan Academy - Cluster Overview",
+      "uid": "clahan-cluster-overview",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Scrape Target Health",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "up", "legendFormat": "{{`{{job}}`}} - {{`{{instance}}`}}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ]
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "API Server Request Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(rate(apiserver_request_total[5m])) by (code)", "legendFormat": "{{`{{code}}`}}", "refId": "A" }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Container CPU Usage - clahan-production",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"clahan-production\"}[5m])) by (pod)", "legendFormat": "{{`{{pod}}`}}", "refId": "A" }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Container Memory Usage - clahan-production",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+          "datasource": { "type": "prometheus", "uid": "prometheus_default" },
+          "targets": [
+            { "expr": "sum(container_memory_working_set_bytes{namespace=\"clahan-production\"}) by (pod)", "legendFormat": "{{`{{pod}}`}}", "refId": "A" }
+          ]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage
+  namespace: {{ .Values.global.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -146,12 +248,23 @@ spec:
               mountPath: /var/lib/grafana
             - name: datasources-volume
               mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-provider-volume
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards-volume
+              mountPath: /var/lib/grafana/dashboards
       volumes:
         - name: storage-volume
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: grafana-storage
         - name: datasources-volume
           configMap:
             name: grafana-datasources
+        - name: dashboard-provider-volume
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dashboards-volume
+          configMap:
+            name: grafana-dashboards
 ---
 apiVersion: v1
 kind: Service
