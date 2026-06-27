@@ -23,3 +23,26 @@ spec:
         - name: argocd-server
           namespace: argocd
           port: 80
+---
+# Gateway API requires an explicit ReferenceGrant in the TARGET namespace
+# (argocd) before an HTTPRoute in another namespace (clahan-production) is
+# allowed to reference a Service there - without it, kgateway refuses to
+# resolve the backend (status: ResolvedRefs=False, reason=RefNotPermitted)
+# and Envoy has no upstream cluster to route to, producing a bodiless 500
+# even though argocd-server itself is perfectly healthy. This was the
+# actual root cause, confirmed by testing argocd-server directly via
+# port-forward (200 OK) while the route through the Gateway 500'd.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway-to-argocd
+  namespace: argocd
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ .Values.global.namespace }}
+  to:
+    - group: ""
+      kind: Service
+      name: argocd-server
