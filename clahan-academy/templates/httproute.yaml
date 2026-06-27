@@ -54,8 +54,8 @@ spec:
             type: PathPrefix
             value: /api/exams
       timeouts:
-        request: 180s
-        backendRequest: 180s
+        request: 300s
+        backendRequest: 300s
       backendRefs:
         - name: exam-service
           port: 4004
